@@ -30,6 +30,7 @@ import type { KeyEvent } from "./keyboard/keys";
 import { hasExtractedEvenHubFonts } from "./firmware-builder";
 import { isHaltedSessionPhase, resumeAutoReconnect, suppressAutoReconnect } from "./reconnect-policy";
 import { WearRemote, type WearRemoteInputKind } from "./wear-remote";
+import { NeuralBandRemote } from "./neural-band";
 
 /** Who a synthetic (non-firmware) input stands for. */
 type SyntheticInputOrigin = "ring" | "watch";
@@ -351,6 +352,8 @@ class DashboardController {
   private glassesLocked = false;
   // Wear OS watch remote; constructed last so it sees a fully wired shell.
   private wearRemote: WearRemote | null = null;
+  // Meta Neural Band, phone-connected; constructed after the watch remote for the same reason.
+  private neuralBandRemote: NeuralBandRemote | null = null;
   private lockSurfaceConfigured = false;
   private lastLockScreenEnabled = lockScreenEnabledSetting.get();
   private offState: (() => void) | null = null;
@@ -438,6 +441,8 @@ class DashboardController {
     // The main page's EvenHub phone-UI button hides while that UI is showing.
     onPhoneShownChanged(() => this.emit());
     shell.configure({
+      // A connected Neural Band offers the Handwriting dialog (see app/g2/neural-band.ts).
+      handwritingSource: () => this.neuralBandRemote?.handwritingSource() ?? null,
       actions: {
         ...sharedActions,
         // Shell overlays (voice dialog, long-press menu) live on the shell
@@ -560,6 +565,17 @@ class DashboardController {
         lastHeadsetBattery: this.lastHeadsetBattery,
       }),
       appendLog: (line) => this.appendLog(line),
+    });
+    // Its gestures take the watch's path (and its spatial scheme): see app/g2/neural-band.ts.
+    this.neuralBandRemote = new NeuralBandRemote({
+      injectInput: (kind) => this.injectSyntheticRingInput(kind, "watch"),
+      takesInput: () => this.phase === "connected" || this.phase === "charging" || this.isPreviewDisplayActive(),
+      appendLog: (line) => this.appendLog(line),
+      batteryChanged: () => {
+        // The top bar and Glanceboard draw it; the phone's battery line reads it from the snapshot.
+        if (this.phase === "connected" || this.phase === "charging" || this.isPreviewDisplayActive()) this.requestShellRender();
+        this.emit();
+      },
     });
   }
 

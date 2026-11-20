@@ -25,6 +25,7 @@ import {
   ringBatteryVisibilitySetting,
   toggleSettingMenuItem,
   watchBatteryVisibilitySetting,
+  bandBatteryVisibilitySetting,
   type BatteryIndicatorVisibility,
 } from "../../../ui/dashboard-settings";
 import { RECORDING_ICON } from "../../../ui/listening-header";
@@ -339,6 +340,7 @@ function collectBatteryItems(): BatteryItem[] {
   push(phoneBatteryVisibilitySetting.get(), "Phone", "phone", phone.battery, phone.charging);
   const levels = shell.getBatteryLevels();
   push(watchBatteryVisibilitySetting.get(), "Watch", "watch", levels.watch, levels.watchCharging);
+  push(bandBatteryVisibilitySetting.get(), "Band", "band", levels.band, levels.bandCharging);
   push(glassesBatteryVisibilitySetting.get(), glassesModelName(), "glasses", levels.headset, levels.headsetCharging);
   if (levels.ring !== null && Number.isInteger(levels.ring) && levels.ring >= 0 && levels.ring <= 100) {
     push(ringBatteryVisibilitySetting.get(), "R1", "ring", levels.ring, levels.ringCharging);

@@ -23,6 +23,13 @@ and Mentra Labs, Inc. (MIT License): https://github.com/tetramo-labs/glassly and
 https://github.com/tetramo-labs/glassly-rayneo-cfw. The iO wire codecs in
 native/kotlin/shared/.../rayneo/RayNeoIoProtocol.kt follow their protocol work.
 
+Meta Neural Band support is ported from Glassly's Neural Band driver (MIT License,
+Tetramo, Inc. and Mentra Labs, Inc.), whose protocol core comes from callbacked's
+kinesis (MIT License) and whose Android transport builds on beyondlevi's rokid-lumen
+(MIT License). The protocol is in native/kotlin/shared/src/androidMain/.../neuralband/
+(license notice in LICENSE-MIT.txt there); the transport, Meta sign-in and claim
+client are App_Resources/Android/.../FaceclawNeuralBand*.kt and FaceclawMeta*.kt.
+
 Bluetooth keyboard support on the G2 uses the keyboard bridge Tetramo, Inc. wrote
 for their Glassly custom firmware (https://github.com/tetramo-labs/g2flash).
 Faceclaw's client for it, in app/g2/keyboard/ and app/apps/terminal/terminal-keys.ts,

@@ -97,8 +97,14 @@ import {
   watchRemoteEnabledSetting,
   watchSoundEffectsSetting,
   watchVibrateOnInputSetting,
+  bandBatteryVisibilitySetting,
+  neuralBandEnabledSetting,
+  neuralBandHapticsSetting,
+  neuralBandTwistScrollSetting,
 } from "../dashboard-settings";
 import { wearBridge } from "../../native/wear-bridge";
+import { neuralBand } from "../../native/neural-band";
+import { neuralBandStatusLine } from "../../g2/neural-band-core";
 import { openSettingsSubMenu, SettingsPanelLayer, type SettingsSection } from "./settings-panel";
 import { uiFontPickerMenuItem } from "../font-picker";
 import { NotificationFilterLayer } from "../notification-filter";
@@ -244,6 +250,16 @@ function settingsSections(): SettingsSection[] {
       ],
       renderDetail: renderWatchStatus,
     },
+    ...(neuralBand.isSupported() ? [{
+      label: "Neural Band",
+      // Meta Neural Band (app/g2/neural-band.ts); paired from the phone app's Neural Band page.
+      items: [
+        toggleSettingMenuItem(neuralBandEnabledSetting),
+        toggleSettingMenuItem(neuralBandTwistScrollSetting),
+        toggleSettingMenuItem(neuralBandHapticsSetting),
+      ],
+      renderDetail: renderNeuralBandStatus,
+    }] : []),
     // A Bluetooth keyboard paired with the glasses themselves (the G2's
     // custom firmware hosts it; app/g2/keyboard/). Hidden rather than left
     // out: the Settings window can be open across a change of glasses.
@@ -396,12 +412,13 @@ function batteryIndicatorsMenuItem(): MenuItem {
   return {
     label: "Battery indicators",
     description:
-      "Top-bar battery indicators for the phone, watch, glasses, and ring: their style, and whether each shows always, only when low, or never.",
+      "Top-bar battery indicators for the phone, watch, Neural Band, glasses, and ring: their style, and whether each shows always, only when low, or never.",
     onSelect: (ctx) => {
       openSettingsSubMenu(ctx, "Battery indicators", [
         enumSettingMenuItem(batteryDisplayModeSetting),
         enumSettingMenuItem(phoneBatteryVisibilitySetting),
         enumSettingMenuItem(watchBatteryVisibilitySetting),
+        ...(neuralBand.isSupported() ? [enumSettingMenuItem(bandBatteryVisibilitySetting)] : []),
         // Named as the top bar names this indicator.
         enumSettingMenuItem(glassesBatteryVisibilitySetting, { label: glassesModelName() }),
         enumSettingMenuItem(ringBatteryVisibilitySetting),
@@ -675,6 +692,16 @@ function renderWatchStatus(args: { image: GrayImage; x: number; y: number; width
     }
   }
   const lines = wrapText(font, status, width);
+  for (let i = 0; i < lines.length; i++) {
+    image.drawText(font, x, y + i * font.lineHeight, lines[i]!, 170);
+  }
+  return lines.length * font.lineHeight + 10;
+}
+
+function renderNeuralBandStatus(args: { image: GrayImage; x: number; y: number; width: number }): number {
+  const { image, x, y, width } = args;
+  const font = getDefaultSmallFont();
+  const lines = wrapText(font, neuralBandStatusLine(neuralBand.getStatus()), width);
   for (let i = 0; i < lines.length; i++) {
     image.drawText(font, x, y + i * font.lineHeight, lines[i]!, 170);
   }

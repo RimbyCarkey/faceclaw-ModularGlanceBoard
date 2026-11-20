@@ -322,6 +322,10 @@ export const ringBatteryVisibilitySetting = batteryVisibilitySetting(
 export const watchBatteryVisibilitySetting = batteryVisibilitySetting(
   "watchBatteryVisibility", "Watch", "display.battery.watchVisibility",
 );
+/** The Meta Neural Band; the indicator only exists while the band is connected. */
+export const bandBatteryVisibilitySetting = batteryVisibilitySetting(
+  "bandBatteryVisibility", "Neural Band", "display.battery.bandVisibility",
+);
 
 /** Whether an indicator with this visibility setting shows at the given charge. */
 export function batteryIndicatorVisible(visibility: BatteryIndicatorVisibility, percent: number): boolean {
@@ -341,6 +345,7 @@ export function batteryIndicatorSettingsKey(): string {
     glassesBatteryVisibilitySetting.get(),
     ringBatteryVisibilitySetting.get(),
     watchBatteryVisibilitySetting.get(),
+    bandBatteryVisibilitySetting.get(),
   ].join("|");
 }
 
@@ -839,6 +844,34 @@ export const watchMirrorAssistantSetting = new ConfigSettingBoolean({
   storageKey: "watch.mirrorAssistant",
   defaultValue: true,
   description: "Stream assistant replies and on-glasses alerts to the watch so they can be read from the wrist.",
+});
+
+// Meta Neural Band (app/g2/neural-band.ts). Pairing lives on the phone (Neural Band in the
+// overflow menu); these apply as soon as they change.
+export const neuralBandEnabledSetting = new ConfigSettingBoolean({
+  id: "neural-band-enabled",
+  label: "Neural Band",
+  storageKey: "neuralBand.enabled",
+  defaultValue: true,
+  description:
+    "Keep the paired Meta Neural Band connected and act on its gestures. Pair one from the phone app's Neural Band page. Turn off to disconnect it.",
+});
+
+export const neuralBandTwistScrollSetting = new ConfigSettingBoolean({
+  id: "neural-band-twist-scroll",
+  label: "Pinch and twist to scroll",
+  storageKey: "neuralBand.twistScroll",
+  defaultValue: false,
+  description:
+    "Hold an index-finger pinch and turn your wrist to scroll, like the ring. The band then streams its gyroscope all the time, which costs band and phone battery.",
+});
+
+export const neuralBandHapticsSetting = new ConfigSettingBoolean({
+  id: "neural-band-haptics",
+  label: "Band vibrates on gestures",
+  storageKey: "neuralBand.haptics",
+  defaultValue: true,
+  description: "The band's own short vibration when it recognises a gesture.",
 });
 
 /**

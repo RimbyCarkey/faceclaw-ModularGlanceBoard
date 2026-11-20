@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Peg-Bounce</title>
+<style>
+@font-face { font-family: PegUi; src: url(data:font/ttf;base64,/* UI FONT */); }
+:root { color-scheme: dark; font: 14px system-ui; background: #131915; color: #def4e2; }
+body { margin: 16px; }
+canvas { display: block; width: 640px; height: 480px; background: black; image-rendering: pixelated; }
+.stage { overflow: auto; }
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 10px 0; }
+button, input, select { font: inherit; }
+input[type=number] { width: 4.5em; }
+p { margin: 8px 0; }
+</style>
+<div class="stage"><canvas id="screen" width="640" height="480" tabindex="0" aria-label="Peg-Bounce app display"></canvas></div>
+<div class="controls">
+  <button data-input="scroll-up">Up</button>
+  <button data-input="scroll-down">Down</button>
+  <button data-input="click">Tap</button>
+  <button data-input="double-click">Double-tap</button>
+  <button id="restart">Restart</button>
+  <label>Width <input id="width" type="number" min="240" max="640" value="640"></label>
+  <label>Height <input id="height" type="number" min="200" max="480" value="480"></label>
+</div>
+<div class="controls">
+  <label>Board scale <input id="board-scale" type="range" min="50" max="100" value="100"> <output id="scale-value">100%</output></label>
+  <label>Board X <input id="board-x" type="number" min="-160" max="160" value="0"></label>
+  <label>Board Y <input id="board-y" type="number" min="-120" max="120" value="0"></label>
+  <label>HUD top <input id="hud" type="number" min="0" max="80" value="0"></label>
+</div>
+<div class="controls">
+  <label>Campaign JSON <input id="campaign" type="file" accept=".json"></label>
+  <label>UI font <input id="ui-font" type="file" accept=".ttf,.otf"></label>
+</div>
+<p id="status" role="status">Starting Peg-Bounce…</p>
+<p>↑/↓ scroll · ←/→ swipe · Enter tap · Esc double-tap</p>
+<script>
+const moduleFactories = {
+/* MODULES */
+};
+/* HOST */
+</script>
+</html>

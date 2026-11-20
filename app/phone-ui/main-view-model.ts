@@ -829,6 +829,10 @@ export class MainViewModel extends RemoteControlsViewModel {
     }
   }
 
+  onAppSettingsTap(): void {
+    Frame.topmost()?.navigate("phone-ui/app-settings-page");
+  }
+
   onPermissionsTap(): void {
     Frame.topmost()?.navigate({
       moduleName: "phone-ui/permissions-page",

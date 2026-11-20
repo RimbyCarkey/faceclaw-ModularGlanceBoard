@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Peg-bounce Level Editor</title>
+<style>
+:root { color-scheme: dark; font: 15px system-ui; color: #e8f1e9; background: #101714; }
+* { box-sizing: border-box; }
+body { margin: auto; max-width: 1440px; padding: 24px; }
+header, .row { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; }
+header { justify-content: space-between; margin-bottom: 15px; }
+h1 { margin: 0; font-size: 24px; }
+h2 { margin: 0 0 12px; font-size: 16px; }
+main { display: grid; grid-template-columns: 168px minmax(0, 1fr) 265px; gap: 16px; }
+section, aside { min-width: 0; }
+.panel { background: #19241e; border: 1px solid #35463b; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+canvas { width: 100%; display: block; background: #0c140f; border: 1px solid #41584a; border-radius: 8px; touch-action: none; }
+button, input, select { font: inherit; border-radius: 6px; border: 1px solid #53675a; color: inherit; background: #25352b; padding: 7px 10px; min-width: 0; }
+button { cursor: pointer; }
+button:disabled { opacity: .48; cursor: default; }
+.primary { background: #acf0ba; color: #112916; border-color: #acf0ba; font-weight: 650; }
+label { display: grid; gap: 5px; color: #b0c7b7; }
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin-bottom: 12px; }
+.fields input, .fields select { width: 100%; }
+#scene { margin: 10px 0; width: 100%; }
+#status { min-height: 2em; margin: 9px 0 0; color: #c8e2ce; font-variant-numeric: tabular-nums; }
+.toolbar { margin-bottom: 10px; }
+.playback { margin-top: 12px; }
+.playback label { display: flex; align-items: center; }
+.small { font-size: 13px; color: #b0c7b7; margin: 8px 0 0; }
+[hidden] { display: none !important; }
+#levels { display:grid; gap:8px; max-height:67vh; overflow:auto; margin:12px 0; }
+.level { padding:6px; text-align:left; display:grid; gap:5px; }
+.level[aria-current="true"] { border-color:#aaf2ae; background:#324c3b; }
+.level canvas { pointer-events:none; border-radius:4px; }
+.level span { overflow-wrap:anywhere; font-size:13px; }
+.dials { display:flex; justify-content:space-between; gap:6px; margin-bottom:12px; }
+.dial { display:grid; justify-items:center; gap:3px; font-size:13px; flex:1; }
+.dial button { position:relative; width:48px; height:48px; border-radius:50%; touch-action:none; cursor:ew-resize; }
+.dial button::before { content:""; position:absolute; left:50%; top:50%; width:3px; height:16px; background:#acf0ba;
+  border-radius:2px; transform-origin:center bottom; transform:translate(-50%,-100%) rotate(var(--turn,0deg)); }
+.check { display:flex; align-items:center; grid-template-columns:none; }
+#warnings { color: #ffbd83; }
+#validation { white-space: pre-line; }
+#save-status { min-height:1.35em; }
+@media (max-width: 900px) { main { grid-template-columns: 130px minmax(0, 1fr); } main > aside:last-child { grid-column:2; } }
+@media (max-width: 650px) { main { grid-template-columns: 1fr; } main > aside:last-child { grid-column:auto; } #levels { display:flex; max-height:none; } .level { min-width:110px; } body { padding: 14px; } }
+</style>
+<header>
+  <div><h1>Peg-bounce Level Editor</h1><label>Campaign name<input id="campaign-name" maxlength="70"></label></div>
+  <div class="row">
+    <button id="import">Open project</button><input id="file" type="file" accept=".json,application/json" hidden>
+    <button id="export" class="primary">Save project</button>
+  </div>
+</header>
+<main>
+<aside class="panel">
+  <h2>Levels</h2>
+  <button id="add-level">Add blank</button>
+  <div id="levels" aria-label="Project levels"></div>
+  <button id="duplicate-level">Duplicate</button>
+  <button id="delete-level">Delete</button>
+</aside>
+<section>
+  <div class="row toolbar">
+    <button data-add="peg">Add peg</button><button data-add="brick">Add straight ramp</button>
+    <button data-add="arc">Add curved ramp</button><button id="wave">Add wave</button><button id="spiral">Add spiral</button>
+  </div>
+  <canvas id="board" width="900" height="800" aria-label="Peg-bounce board. Select and drag pieces to position them."></canvas>
+  <div class="row playback">
+    <label>Aim <input id="aim" type="range" min="-75" max="75" step="1" value="0"> <output id="angle">0°</output></label>
+    <button id="fire" class="primary">Launch</button><button id="pause">Pause</button>
+    <button id="step">Step</button><button id="reset">Reset shot</button>
+    <label>Speed <select id="speed"><option value=".25">¼×</option><option value=".5">½×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label>
+  </div>
+  <p id="status" role="status"></p><p id="warnings" class="small"></p><p id="validation" class="small" aria-live="polite"></p><p id="save-status" class="small" aria-live="polite"></p>
+</section>
+<aside>
+  <div class="panel">
+    <h2>Active level</h2>
+    <div class="fields">
+      <label style="grid-column:span 2">Name<input id="level-name" maxlength="80"></label>
+      <label>Orange pegs<input id="target-count" type="number" min="0" max="250" step="1"></label>
+      <label>Balls<input id="ball-count" type="number" min="1" max="999" step="1"></label>
+      <label>Grid spacing<input id="grid-step" type="number" min="2" max="100" step="1"></label>
+    </div>
+    <div class="row"><button id="deal">Deal targets</button><label class="check"><input id="grid" type="checkbox">Grid</label></div>
+    <label style="margin-top:12px">Campaign preset<select id="preset"></select></label>
+    <button id="load" style="margin-top:8px">Add preset as level</button>
+  </div>
+  <div class="panel">
+    <h2>Selected piece</h2>
+    <p id="empty" class="small">Select a piece on the board or from the list.</p>
+    <select id="scene" aria-label="Board pieces"></select>
+    <div id="properties" hidden>
+      <div class="dials">
+        <span class="dial"><button type="button" data-dial="x" aria-label="Horizontal movement knob" title="Drag, or use the arrow keys"></button>X</span>
+        <span class="dial"><button type="button" data-dial="y" aria-label="Vertical movement knob" title="Drag, or use the arrow keys"></button>Y</span>
+        <span class="dial" id="rotation-dial"><button type="button" data-dial="rotation" aria-label="Rotation knob" title="Drag, or use the arrow keys"></button>Rotate</span>
+      </div>
+      <div class="fields">
+        <label>X<input id="x" type="number" min="0" max="600" step="1"></label>
+        <label>Y<input id="y" type="number" min="0" step="1"></label>
+        <label id="radius-field"><span id="radius-label">Radius</span><input id="radius" type="number" min="1" max="300" step="1"></label>
+        <label id="rotation-field">Rotation °<input id="rotation" type="number" min="-360" max="360" step="1"></label>
+        <label id="length-field">Length<input id="length" type="number" min="4" max="550" step="1"></label>
+        <label id="amplitude-field">Wave height<input id="amplitude" type="number" min="0" max="180" step="1"></label>
+        <label id="cycles-field">Waves<input id="cycles" type="number" min="0.5" max="8" step="0.25"></label>
+        <label id="turns-field">Turns<input id="turns" type="number" min="0.25" max="4" step="0.25"></label>
+        <label id="pitch-field">Spacing per turn<input id="pitch" type="number" min="0" max="130" step="1"></label>
+        <label id="span-field">Arc sweep °<input id="span" type="number" min="5" max="360" step="1"></label>
+        <label id="thickness-field">Thickness<input id="thickness" type="number" min="2" max="50" step="1"></label>
+        <label>Role<select id="role"><option value="standard">Standard</option><option value="target">Target</option><option value="bonus">Bonus</option><option value="power">Power</option><option value="blocker">Permanent</option></select></label>
+      </div>
+      <label class="check" id="solid-field"><input id="solid" type="checkbox">Permanent block</label>
+      <label class="check"><input id="snap" type="checkbox">Snap this piece to grid</label>
+      <label style="margin:10px 0">Mirror partner<select id="partner"></select></label>
+      <div class="row"><button id="ungroup" hidden>Ungroup tiles</button><button id="mirror">Mirror copy</button><button id="duplicate">Duplicate</button><button id="delete">Delete</button></div>
+    </div>
+  </div>
+</aside>
+<script>/* EDITOR_BUNDLE */</script>
+</html>

@@ -1,0 +1,22 @@
+<Page xmlns="http://schemas.nativescript.org/tns.xsd" navigatingTo="navigatingTo">
+    <ActionBar title="Peg-Bounce" />
+    <ScrollView>
+        <StackLayout padding="16">
+            <Label text="Campaigns" class="h2" />
+            <Label text="Main Campaign is built in. Open Campaign in Peg-Bounce to choose a pack." textWrap="true" />
+            <Button text="Import Campaign Pack" tap="{{ importLevels }}" isEnabled="{{ ready }}" />
+            <Label text="Imported packs" class="h3 m-t-16" />
+            <Label text="{{ emptyMessage }}" visibility="{{ emptyMessage ? 'visible' : 'collapse' }}" textWrap="true" />
+            <Repeater items="{{ packRows }}" isEnabled="{{ ready }}">
+                <Repeater.itemTemplate>
+                    <GridLayout columns="*, auto" padding="0 0 0 8">
+                        <Label col="0" text="{{ name }}" textWrap="true" verticalAlignment="middle" />
+                        <Button col="1" text="Remove" tap="{{ remove }}" />
+                    </GridLayout>
+                </Repeater.itemTemplate>
+            </Repeater>
+            <Button text="Remove All Imported Packs" tap="{{ resetCampaign }}"
+                visibility="{{ canReset ? 'visible' : 'collapse' }}" isEnabled="{{ ready }}" />
+        </StackLayout>
+    </ScrollView>
+</Page>

@@ -1,0 +1,6 @@
+<Page xmlns="http://schemas.nativescript.org/tns.xsd">
+    <ActionBar title="App Settings" />
+    <StackLayout padding="16">
+        <Button text="Peg-bounce" tap="openPegBounce" />
+    </StackLayout>
+</Page>

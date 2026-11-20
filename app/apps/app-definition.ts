@@ -3,7 +3,7 @@ import { type Plane } from "../graphics/plane";
 import { type IconName } from "../graphics/icons";
 import { type LayerActions } from "../ui/layers";
 import { type InProcessAppOptions, type InProcessWindow } from "../ui/shell/in-process-window";
-import { WorkerAppHost } from "../ui/shell/worker-window";
+import { WorkerAppHost, type WorkerWindowSpec } from "../ui/shell/worker-window";
 import { shell, type TrayWidget } from "../ui/shell/shell";
 
 /**
@@ -189,6 +189,7 @@ export async function launchWorkerAppWindow(
     matchExistingBy?: "appId" | "windowId";
     /** Deliver watch swipes raw instead of the fallback (see WorkerWindowSpec). */
     acceptsDirectional?: boolean;
+    heightMode?: WorkerWindowSpec["heightMode"];
     /** Deliver hardware-keyboard keys as keys (see WorkerWindowSpec). */
     acceptsKeys?: boolean;
   },
@@ -211,6 +212,7 @@ export async function launchWorkerAppWindow(
     icon: options.icon,
     focus: true,
     acceptsDirectional: options.acceptsDirectional,
+    heightMode: options.heightMode,
     acceptsKeys: options.acceptsKeys,
   });
   ctx.appendLog(`launched ${options.windowId}`);
